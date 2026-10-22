@@ -3,13 +3,14 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import sys
 from pathlib import Path
 
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
-from core import ConfigError, StorageError, dispatcher, runtime
+from core import ConfigError, StorageError, dispatcher, runtime, webserver
 from core.config import Config
 from core.database import Database
 from core.github import GitHubClient
@@ -25,6 +26,10 @@ async def run() -> None:
     runtime.setup(config=config, db=db, client=client)
     loader = Loader(runtime)
     runtime.loader = loader
+    web = None
+    if os.environ.get("PORT"):  # الاستضافات المجانية (Web Service) تشترط منفذًا مفتوحًا
+        web = await webserver.start(int(os.environ["PORT"]))
+        log.info("خادم فحص الصحة يعمل على المنفذ %s.", os.environ["PORT"])
     try:
         if await db.start():
             log.info("أُنشئ فرع قاعدة البيانات «%s» لأول مرة.", config.github_branch)
@@ -46,6 +51,8 @@ async def run() -> None:
         await loader.unload_all()
         await db.stop()
         await client.disconnect()
+        if web:
+            web.close()
 
 
 def main() -> None:

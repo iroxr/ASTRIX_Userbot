@@ -1,0 +1,27 @@
+# مخطط النشر على Render (Blueprint). يُستخدم مع زر «النشر» الموجود في README.
+# كل مستخدم ينشر نسخته الخاصة في حسابه، فتبقى جلسته وبياناته عنده وحده.
+services:
+  - type: web
+    name: astrix-userbot
+    runtime: python
+    plan: free
+    autoDeploy: false          # لا تُطبَّق التحديثات إلا بموافقة صاحب الحساب
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      - key: GITHUB_BRANCH
+        value: database
+      - key: COMMAND_PREFIX
+        value: .
+      - key: TG_API_ID
+        sync: false            # يُطلب من المستخدم عند النشر ولا يُخزَّن في المستودع
+      - key: TG_API_HASH
+        sync: false
+      - key: TG_SESSION
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_REPO
+        sync: false
